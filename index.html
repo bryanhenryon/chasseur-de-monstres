@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Monster Slayer</title>
+    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="css/foundation.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- MENU PRINCIPAL -->
+      <section v-if="!gameStarted" class="row controls">
+        <form
+          v-if="!gameStarted"
+          @submit.prevent="gameStarted = true, fightStarted = true"
+        >
+          <h1>Mon Super RPG</h1>
+          <img src="img/you.png" alt="" / style="height:150px;
+          margin-bottom:20px">
+          <label for="player-name" style="display: block;"
+            >Nom du héros :</label
+          >
+          <input
+            v-model="playerName"
+            type="text"
+            id="player-name"
+            placeholder="Ex: Cacahuète"
+          />
+        </form>
+        <button
+          id="start-game"
+          @click="gameStarted = true, fightStarted = true"
+          v-if="!gameStarted && !fightStarted"
+        >
+          NOUVELLE PARTIE
+        </button>
+
+        <div id="stats">
+          <div id="wins">
+            <template v-if="wins !== null">
+              <h3>Victoires</h3>
+              <span>{{ wins }}</span>
+            </template>
+            <template v-else>
+              <h3>Victoires</h3>
+              <span>0</span>
+            </template>
+          </div>
+
+          <div id="deaths">
+            <template v-if="deaths !== null">
+              <h3>Morts</h3>
+              <span>{{ deaths }}</span>
+            </template>
+            <template v-else>
+              <h3>Morts</h3>
+              <span>0</span>
+            </template>
+          </div>
+        </div>
+
+        <div style="margin: 50px 0 20px 0;">
+          &copy; {{ copyrightYear }} Bryan henryon &mdash;
+          <a href="#">www.bryanhenryon.fr</a>
+        </div>
+      </section>
+      <!--FIN DU MENU PRINCIPAL -->
+
+      <!--INTERFACE DE COMBAT-->
+      <section class="row" v-if="gameStarted">
+        <div class="small-6 columns" :class="{'player-dead': hasWon === false}">
+          <div id="character-sprite">
+            <img src="img/you.png" alt="" />
+          </div>
+          <h1 class="text-center" style="text-transform: uppercase;">
+            <span v-if="playerName !== null">
+              {{ playerName }}
+            </span>
+            <span v-else>
+              Mystérieux Chevalier
+            </span>
+          </h1>
+          <div style="font-weight: bold;">({{ playerHealth }} / 100 PV)</div>
+          <div class="healthbar">
+            <div
+              class="healthbar text-center"
+              :style="{ 'max-width': playerHealth + '%', background: playerHealthColor }"
+              style="margin: 0; color: white; transition: max-width 500ms;"
+            ></div>
+          </div>
+        </div>
+        <div
+          class="small-6 columns"
+          :class="{'defeated-monster': hasWon === true}"
+        >
+          <div id="monster-sprite">
+            <img :src="currentMonster.image" alt="" />
+          </div>
+          <h1 class="text-center" style="text-transform: uppercase;">
+            {{ currentMonster.name }}
+          </h1>
+          <div style="font-weight: bold; text-align: right;">
+            ({{ monsterHealth }} / 100 PV)
+          </div>
+          <div class="healthbar">
+            <div
+              class="healthbar text-center"
+              :style="{ width: monsterHealth + '%', background: monsterHealthColor }"
+              style="margin: 0; color: white; transition: width 500ms;"
+            ></div>
+          </div>
+        </div>
+      </section>
+      <section class="row controls" v-if="gameStarted && !fightStarted">
+        <div class="small-12 columns">
+          <h3 v-if="hasWon">
+            {{ currentMonster.sentence }}
+          </h3>
+          <h3 v-if="hasWon === false">
+            Vous êtes mort :(
+          </h3>
+          <button
+            @click="newGame()"
+            id="start-game"
+            v-if="gameStarted && !fightStarted"
+          >
+            NOUVEAU COMBAT
+          </button>
+          <button
+            id="give-up"
+            v-if="gameStarted && !fightStarted"
+            @click="restart"
+          >
+            RETOURNER AU MENU
+          </button>
+        </div>
+      </section>
+      <section class="row controls" v-if="gameStarted && fightStarted">
+        <div class="small-12 columns">
+          <button id="attack" @click="attackMonster">ATTAQUER</button>
+          <button
+            id="special-attack"
+            @click="specialAttack()"
+            :disabled="specialAttackUsed"
+          >
+            ATTAQUE SPECIALE
+          </button>
+          <button id="heal" @click="heal()" :disabled="healUsed">SOIN</button>
+          <button id="give-up" @click="restart">ABANDONNER</button>
+        </div>
+      </section>
+      <section class="row log" v-if="gameStarted">
+        <div class="small-12 columns">
+          <ul>
+            <template v-for="log of logs">
+              <li v-if="log.turn === 'monster'" id="monster-log">
+                {{ log.message }}
+              </li>
+              <li v-if="log.turn === 'player'" id="player-log">
+                {{ log.message }}
+              </li>
+            </template>
+          </ul>
+        </div>
+      </section>
+    </div>
+    <script src="js/app.js"></script>
+  </body>
+</html>
